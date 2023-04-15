@@ -7,9 +7,6 @@ Public Class Form1
     ' Create a connection to the database
     Dim connectionString As String = "Driver={MySQL ODBC 8.0 ANSI Driver};Server=localhost:3309;Database=m1_gradingsystem_db;Uid=root;"
 
-    ' Create ng instance or bagong object para sa connection ng database
-    Dim connection As New OdbcConnection(connectionString)
-
     Private Sub CheckBox1_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CheckBox1.CheckedChanged
         If CheckBox1.Checked = False Then
             tbpassword.PasswordChar = "*"
@@ -25,12 +22,12 @@ Public Class Form1
         Dim name As String = tbusername.Text
         Dim password As String = tbpassword.Text
 
-
+        ' Create ng instance or bagong object para sa connection ng database using OdbcConnection
         Using connection As New OdbcConnection(connectionString)
-            ' prepare connectio before saving
+            ' prepare connection before saving
             connection.Open()
             Using command As New OdbcCommand(find_username_password, connection)
-                command.Parameters.AddWithValue("@name", Name)
+                command.Parameters.AddWithValue("@name", name)
                 command.Parameters.AddWithValue("@password", password)
                 Dim reader = command.ExecuteReader()
 
@@ -59,7 +56,7 @@ Public Class Form1
                     End If
 
                 End While
-
+                reader.Close()
             End Using
             ' close the connection after fetching
             connection.Close()
@@ -68,7 +65,6 @@ Public Class Form1
         If rowCount = 0 Then
             MessageBox.Show("Invalid username or password", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End If
-
 
     End Sub
 End Class

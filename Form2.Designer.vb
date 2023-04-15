@@ -24,7 +24,7 @@ Partial Class Form2
     Private Sub InitializeComponent()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox
         Me.tbname = New System.Windows.Forms.TextBox
-        Me.GroupBox2 = New System.Windows.Forms.GroupBox
+        Me.grades = New System.Windows.Forms.GroupBox
         Me.tbfinal = New System.Windows.Forms.TextBox
         Me.tbsemis = New System.Windows.Forms.TextBox
         Me.tbmidterm = New System.Windows.Forms.TextBox
@@ -46,12 +46,13 @@ Partial Class Form2
         Me.SaveBtn = New System.Windows.Forms.Button
         Me.DataGridView1 = New System.Windows.Forms.DataGridView
         Me.GroupBox4 = New System.Windows.Forms.GroupBox
+        Me.ComboBox1 = New System.Windows.Forms.ComboBox
         Me.tblevel = New System.Windows.Forms.TextBox
-        Me.tbsubject = New System.Windows.Forms.TextBox
         Me.Label2 = New System.Windows.Forms.Label
         Me.Label1 = New System.Windows.Forms.Label
+        Me.reloadTable = New System.Windows.Forms.Button
         Me.GroupBox1.SuspendLayout()
-        Me.GroupBox2.SuspendLayout()
+        Me.grades.SuspendLayout()
         Me.GroupBox3.SuspendLayout()
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox4.SuspendLayout()
@@ -76,23 +77,23 @@ Partial Class Form2
         Me.tbname.TabIndex = 0
         Me.tbname.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
-        'GroupBox2
+        'grades
         '
-        Me.GroupBox2.Controls.Add(Me.tbfinal)
-        Me.GroupBox2.Controls.Add(Me.tbsemis)
-        Me.GroupBox2.Controls.Add(Me.tbmidterm)
-        Me.GroupBox2.Controls.Add(Me.tbprelim)
-        Me.GroupBox2.Controls.Add(Me.lbfinal)
-        Me.GroupBox2.Controls.Add(Me.lbsemis)
-        Me.GroupBox2.Controls.Add(Me.lbmidterm)
-        Me.GroupBox2.Controls.Add(Me.lbprelim)
-        Me.GroupBox2.ForeColor = System.Drawing.Color.White
-        Me.GroupBox2.Location = New System.Drawing.Point(12, 154)
-        Me.GroupBox2.Name = "GroupBox2"
-        Me.GroupBox2.Size = New System.Drawing.Size(191, 165)
-        Me.GroupBox2.TabIndex = 3
-        Me.GroupBox2.TabStop = False
-        Me.GroupBox2.Text = "Enter Grade Here"
+        Me.grades.Controls.Add(Me.tbfinal)
+        Me.grades.Controls.Add(Me.tbsemis)
+        Me.grades.Controls.Add(Me.tbmidterm)
+        Me.grades.Controls.Add(Me.tbprelim)
+        Me.grades.Controls.Add(Me.lbfinal)
+        Me.grades.Controls.Add(Me.lbsemis)
+        Me.grades.Controls.Add(Me.lbmidterm)
+        Me.grades.Controls.Add(Me.lbprelim)
+        Me.grades.ForeColor = System.Drawing.Color.White
+        Me.grades.Location = New System.Drawing.Point(12, 154)
+        Me.grades.Name = "grades"
+        Me.grades.Size = New System.Drawing.Size(191, 165)
+        Me.grades.TabIndex = 3
+        Me.grades.TabStop = False
+        Me.grades.Text = "Enter Grade Here"
         '
         'tbfinal
         '
@@ -265,16 +266,16 @@ Partial Class Form2
         '
         Me.DataGridView1.BackgroundColor = System.Drawing.SystemColors.InactiveCaption
         Me.DataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.DataGridView1.Location = New System.Drawing.Point(421, 12)
+        Me.DataGridView1.Location = New System.Drawing.Point(421, 8)
         Me.DataGridView1.Name = "DataGridView1"
         Me.DataGridView1.ReadOnly = True
-        Me.DataGridView1.Size = New System.Drawing.Size(734, 411)
+        Me.DataGridView1.Size = New System.Drawing.Size(734, 368)
         Me.DataGridView1.TabIndex = 10
         '
         'GroupBox4
         '
+        Me.GroupBox4.Controls.Add(Me.ComboBox1)
         Me.GroupBox4.Controls.Add(Me.tblevel)
-        Me.GroupBox4.Controls.Add(Me.tbsubject)
         Me.GroupBox4.Controls.Add(Me.Label2)
         Me.GroupBox4.Controls.Add(Me.Label1)
         Me.GroupBox4.ForeColor = System.Drawing.Color.White
@@ -285,19 +286,20 @@ Partial Class Form2
         Me.GroupBox4.TabStop = False
         Me.GroupBox4.Text = "Student Information"
         '
+        'ComboBox1
+        '
+        Me.ComboBox1.FormattingEnabled = True
+        Me.ComboBox1.Location = New System.Drawing.Point(57, 26)
+        Me.ComboBox1.Name = "ComboBox1"
+        Me.ComboBox1.Size = New System.Drawing.Size(130, 21)
+        Me.ComboBox1.TabIndex = 4
+        '
         'tblevel
         '
         Me.tblevel.Location = New System.Drawing.Point(249, 26)
         Me.tblevel.Name = "tblevel"
         Me.tblevel.Size = New System.Drawing.Size(131, 20)
         Me.tblevel.TabIndex = 3
-        '
-        'tbsubject
-        '
-        Me.tbsubject.Location = New System.Drawing.Point(55, 27)
-        Me.tbsubject.Name = "tbsubject"
-        Me.tbsubject.Size = New System.Drawing.Size(131, 20)
-        Me.tbsubject.TabIndex = 2
         '
         'Label2
         '
@@ -317,12 +319,22 @@ Partial Class Form2
         Me.Label1.TabIndex = 0
         Me.Label1.Text = "Subject"
         '
+        'reloadTable
+        '
+        Me.reloadTable.Location = New System.Drawing.Point(699, 382)
+        Me.reloadTable.Name = "reloadTable"
+        Me.reloadTable.Size = New System.Drawing.Size(201, 40)
+        Me.reloadTable.TabIndex = 12
+        Me.reloadTable.Text = "Reload Table"
+        Me.reloadTable.UseVisualStyleBackColor = True
+        '
         'Form2
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.Color.SaddleBrown
-        Me.ClientSize = New System.Drawing.Size(1167, 435)
+        Me.ClientSize = New System.Drawing.Size(1166, 435)
+        Me.Controls.Add(Me.reloadTable)
         Me.Controls.Add(Me.GroupBox4)
         Me.Controls.Add(Me.DataGridView1)
         Me.Controls.Add(Me.SaveBtn)
@@ -330,16 +342,17 @@ Partial Class Form2
         Me.Controls.Add(Me.computeBtn)
         Me.Controls.Add(Me.Button1)
         Me.Controls.Add(Me.GroupBox3)
-        Me.Controls.Add(Me.GroupBox2)
+        Me.Controls.Add(Me.grades)
         Me.Controls.Add(Me.GroupBox1)
         Me.Cursor = System.Windows.Forms.Cursors.Default
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.Name = "Form2"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = " "
         Me.GroupBox1.ResumeLayout(False)
         Me.GroupBox1.PerformLayout()
-        Me.GroupBox2.ResumeLayout(False)
-        Me.GroupBox2.PerformLayout()
+        Me.grades.ResumeLayout(False)
+        Me.grades.PerformLayout()
         Me.GroupBox3.ResumeLayout(False)
         Me.GroupBox3.PerformLayout()
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).EndInit()
@@ -350,7 +363,7 @@ Partial Class Form2
     End Sub
     Friend WithEvents GroupBox1 As System.Windows.Forms.GroupBox
     Friend WithEvents tbname As System.Windows.Forms.TextBox
-    Friend WithEvents GroupBox2 As System.Windows.Forms.GroupBox
+    Friend WithEvents grades As System.Windows.Forms.GroupBox
     Friend WithEvents lbfinal As System.Windows.Forms.Label
     Friend WithEvents lbsemis As System.Windows.Forms.Label
     Friend WithEvents lbmidterm As System.Windows.Forms.Label
@@ -372,8 +385,9 @@ Partial Class Form2
     Friend WithEvents SaveBtn As System.Windows.Forms.Button
     Friend WithEvents DataGridView1 As System.Windows.Forms.DataGridView
     Friend WithEvents GroupBox4 As System.Windows.Forms.GroupBox
-    Friend WithEvents tbsubject As System.Windows.Forms.TextBox
     Friend WithEvents Label2 As System.Windows.Forms.Label
     Friend WithEvents Label1 As System.Windows.Forms.Label
     Friend WithEvents tblevel As System.Windows.Forms.TextBox
+    Friend WithEvents reloadTable As System.Windows.Forms.Button
+    Friend WithEvents ComboBox1 As System.Windows.Forms.ComboBox
 End Class

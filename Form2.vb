@@ -53,9 +53,7 @@ Public Class Form2
             tbsemgrade.Clear()
             tbgenave.Clear()
             tbremarks.Clear()
-            tbsubject.Clear()
             tblevel.Clear()
-
         End If
     End Sub
     ' end of alyssandra
@@ -64,8 +62,8 @@ Public Class Form2
         ' checking kung open yung database para fresh start si connection if need i-open
         ' If connection.State = System.Data.ConnectionState.Open Then connection.Close()
 
-        ' itong code na to is para sa pag check ng textbox kung may laman. kapag si tbname, tbsubject etc. ay may laman mag sho-show ng confirmation message else mag sho-show ng error message
-        If ((tbname.Text.Length > 0) And (tbsubject.Text.Length > 0) And (tblevel.Text.Length > 0) And (tbprelim.Text.Length > 0) And (tbmidterm.Text.Length > 0) And (tbsemis.Text.Length > 0) And (tbfinal.Text.Length > 0)) Then
+        ' itong code na to is para sa pag check ng textbox kung may laman. kapag si tbname, subject etc. ay may laman mag sho-show ng confirmation message else mag sho-show ng error message
+        If ((tbname.Text.Length > 0) And (ComboBox1.SelectedItem.ToString.Length > 0) And (tblevel.Text.Length > 0) And (tbprelim.Text.Length > 0) And (tbmidterm.Text.Length > 0) And (tbsemis.Text.Length > 0) And (tbfinal.Text.Length > 0)) Then
             ' Saving student information
             Dim response As Byte
 
@@ -73,36 +71,22 @@ Public Class Form2
 
             If response = DialogResult.Yes Then
 
-                ' **Start SQL Command pang save ng student
-                ' kapag existing na sa database yung user hindi na sya mase-save yung grade nalang.
-                Dim student_details_query As String = "INSERT INTO users (name, role, password) VALUES (?, ?, ?)"
 
+                Dim studId As Integer = findStudentIdByName(tbname.Text)
 
-                Dim name As String = tbname.Text
-                Dim role As String = "student" ' default when saving student
-                Dim password As String = "password" ' default password
+                ' checking if meron ng data si student sa database
+                ' if meron, grades nalang ang ise-save
+                ' if wala pa, ise-save ang student info and grades
+                If studId > 0 Then
+                    Debug.Print("is saving grades only? should have grades not equal to 0: " + studId.ToString)
+                    saveStudentGrades()
+                Else
+                    Debug.Print("is saving student and grades? should have no existing student: " + studId.ToString)
+                    saveStudent()
+                End If
 
-                ' "Using" statement to automatically dispose the OdbcConnection and OdbcCommand objects and release the resources or memory they are using
-                Using connection As New OdbcConnection(connectionString)
-                    ' prepare connectio before saving
-                    connection.Open()
-                    Using command As New OdbcCommand(student_details_query, connection)
-                        command.Parameters.AddWithValue("@name", name)
-                        command.Parameters.AddWithValue("@role", role)
-                        command.Parameters.AddWithValue("@password", password)
-                        Debug.Print("Affect row: " + command.ExecuteNonQuery().ToString)
-                    End Using
-                    Debug.Print("Student: " + name + " Successfully save...")
-                    ' close the connection after saving
-                    connection.Close()
-                End Using
-                ' end of saving student
-
-                ' **Start SQL Command pang save ng student grades
-                Dim student_grades_query As String = "" ' save grades
-
-                ' end of saving student
             End If
+            ' end of saving student
         Else
             MessageBox.Show("Cannot be Save. Text box is empty", "Failed to Save", MessageBoxButtons.OK, MessageBoxIcon.Warning)
         End If
@@ -110,6 +94,193 @@ Public Class Form2
     End Sub
 
     Private Sub Form2_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+        loadStudentListTable()
+
+        ' dev by allyn
+        ' nag ddisplay ng list of subjects from database
+        Dim get_subject_list_query As String = "SELECT id, subject FROM subjects"
+        connection.Open()
+        Dim command As New OdbcCommand(get_subject_list_query, connection)
+
+        Dim reader = command.ExecuteReader()
+        While reader.Read()
+            ComboBox1.Items.Add(reader("subject").ToString)
+
+        End While
+        reader.Close()
+        connection.Close()
+        ' end ng nag di-display ng subject
+
+    End Sub
+
+    ' develop by janses 
+    Private Sub tbprelim_KeyPress(ByVal sender As Object, ByVal e As KeyPressEventArgs) Handles tbprelim.KeyPress
+
+        If Not Char.IsNumber(e.KeyChar) And Not e.KeyChar = Chr(Keys.Delete) And Not e.KeyChar = Chr(Keys.Back) And Not e.KeyChar = Chr(Keys.Space) Then
+            e.Handled = True
+            MessageBox.Show("This field will accept numbers only")
+        End If
+    End Sub
+    Private Sub tbmidterm_KeyPress(ByVal sender As Object, ByVal e As KeyPressEventArgs) Handles tbmidterm.KeyPress
+
+        If Not Char.IsNumber(e.KeyChar) And Not e.KeyChar = Chr(Keys.Delete) And Not e.KeyChar = Chr(Keys.Back) And Not e.KeyChar = Chr(Keys.Space) Then
+            e.Handled = True
+            MessageBox.Show("This field will accept numbers only")
+        End If
+    End Sub
+    Private Sub tbsemis_KeyPress(ByVal sender As Object, ByVal e As KeyPressEventArgs) Handles tbsemis.KeyPress
+
+        If Not Char.IsNumber(e.KeyChar) And Not e.KeyChar = Chr(Keys.Delete) And Not e.KeyChar = Chr(Keys.Back) And Not e.KeyChar = Chr(Keys.Space) Then
+            e.Handled = True
+            MessageBox.Show("This field will accept numbers only")
+        End If
+    End Sub
+    Private Sub tbfinal_KeyPress(ByVal sender As Object, ByVal e As KeyPressEventArgs) Handles tbfinal.KeyPress
+
+        If Not Char.IsNumber(e.KeyChar) And Not e.KeyChar = Chr(Keys.Delete) And Not e.KeyChar = Chr(Keys.Back) And Not e.KeyChar = Chr(Keys.Space) Then
+            e.Handled = True
+            MessageBox.Show("This field will accept numbers only")
+        End If
+    End Sub
+    ' end of janses
+
+    ' dev by alexander
+    Private Sub reloadTable_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles reloadTable.Click
+
+        Debug.Print("Trying to reload DataGridView")
+        ' reload function for student table
+        loadStudentListTable()
+        Debug.Print("DataGridView Reloaded Successfully")
+    End Sub
+    ' end of alexander
+
+    ' function na kumukuha ng student id na base sa name
+    Private Function findStudentIdByName(ByVal name As String)
+
+        Dim selectStudentQuery As String = "SELECT u.id from users u WHERE u.name = ?"
+
+        Dim studId As Integer
+
+        Using command As New OdbcCommand(selectStudentQuery, connection)
+
+            connection.Open()
+            command.Parameters.AddWithValue("@u.name", name)
+            Dim reader = command.ExecuteReader()
+
+            While reader.Read()
+                Debug.Print("Response : " + reader("id").ToString)
+                studId = reader("id")
+            End While
+            ' close the connection after saving
+            reader.Close()
+            connection.Close()
+        End Using
+
+        Return studId
+    End Function
+
+    ' function na nag se-save ng users or student
+    Private Sub saveStudent()
+        ' **Start SQL Command pang save ng student
+        ' kapag existing na sa database yung user hindi na sya mase-save yung grade nalang.
+        Dim student_details_query As String = "INSERT INTO users (name, role, password) VALUES (?, ?, ?)"
+
+        Dim name As String = tbname.Text
+        Dim role As String = "student" ' default when saving student
+        Dim password As String = "password" ' default password
+
+        ' "Using" statement to automatically dispose the OdbcConnection and OdbcCommand objects and release the resources or memory they are using
+        Using connection As New OdbcConnection(connectionString)
+            ' prepare connectio before saving
+            connection.Open()
+            Using command As New OdbcCommand(student_details_query, connection)
+                command.Parameters.AddWithValue("@name", name)
+                command.Parameters.AddWithValue("@role", role)
+                command.Parameters.AddWithValue("@password", password)
+                Dim rows As Integer = command.ExecuteNonQuery()
+                Debug.Print("Affect row: " + rows.ToString)
+            End Using
+            Debug.Print("Student: " + name + " Successfully save...")
+            ' close the connection after saving
+            connection.Close()
+        End Using
+        ' save grades after saving student info
+        saveStudentGrades()
+        ' end of saving student
+    End Sub
+
+    ' function na nag se-save ng grades ni student
+    Private Sub saveStudentGrades()
+        ' **Start SQL Command pang save ng student grades
+        Dim student_grades_query As String = "INSERT INTO grades (subjectid, studentid, prelim, midterm, semis, final, level, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?)" 'save grades
+
+        Dim studId As Integer = findStudentIdByName(tbname.Text)
+        ' variables na humahawak sa data ng student info before saving grades
+        Dim studentId As Integer = studId
+        Dim subjectid As Integer = getSubjectId(ComboBox1.SelectedItem.ToString)
+        Dim prelim As String = tbprelim.Text
+        Dim midterm As String = tbmidterm.Text
+        Dim semis As String = tbsemis.Text
+        Dim final As String = tbfinal.Text
+        Dim level As String = tblevel.Text
+        Dim year As String = "2022-2023"
+
+        'initiator of connection to database
+        Using connection As New OdbcConnection(connectionString)
+            ' prepare connection before saving
+            connection.Open()
+            ' preparation of command for query and parameter
+            Using command As New OdbcCommand(student_grades_query, connection)
+                command.Parameters.AddWithValue("@subjectid", subjectid)
+                command.Parameters.AddWithValue("@studentid", studentId)
+                command.Parameters.AddWithValue("@prelim", prelim)
+                command.Parameters.AddWithValue("@midterm", midterm)
+                command.Parameters.AddWithValue("@semis", semis)
+                command.Parameters.AddWithValue("@final", final)
+                command.Parameters.AddWithValue("@level", level)
+                command.Parameters.AddWithValue("@year", year)
+                Debug.Print("Student Info ID: " + studentId.ToString)
+                ' execute query command
+                Debug.Print("Affect row: " + command.ExecuteNonQuery().ToString)
+            End Using
+            Debug.Print("Student: " + Name + " Grade Successfully save...")
+            ' close the connection after saving
+            connection.Close()
+        End Using
+
+    End Sub
+
+    ' dev by allyn
+    ' function na nag babalik ng selected item sa combo box ni subject
+    Private Function getSubjectId(ByVal subject_name As String)
+
+        Dim subId As Integer
+
+        ' SQL query na kumukuha ng id ng selected subject
+        Dim get_subject_id_query As String = "SELECT id FROM subjects WHERE subject = ?"
+        ' execute yung query using yung OdbcCommand
+
+        Using command As New OdbcCommand(get_subject_id_query, connection)
+            connection.Open()
+            command.Parameters.AddWithValue("@subject", subject_name)
+            Dim reader = command.ExecuteReader()
+
+            While reader.Read()
+                Debug.Print("Subject ID : " + reader("id").ToString)
+                subId = reader("id")
+            End While
+            ' close the connection after getting subject id
+            reader.Close()
+            connection.Close()
+        End Using
+
+        Return subId
+        ' end of allyn
+    End Function
+
+
+    ' function na naglo-load ng table
+    Private Sub loadStudentListTable()
         ' dev by denn
         tbsemgrade.Enabled = False
 
@@ -166,7 +337,6 @@ Public Class Form2
             Dim semGrade As Double = (prelim + midterm + semis + final) / 4
             Dim genAve As String = ComputeGeneralAverage(semGrade)
             Dim remarks As String = GetRemarks(semGrade)
-            Debug.Print(CStr(semGrade) + " " + genAve + " " + remarks)
             row("Sem Grade") = semGrade
             row("Gen Ave") = genAve
             row("Remarks") = remarks
@@ -177,34 +347,4 @@ Public Class Form2
 
     End Sub
 
-    ' develop by janses 
-    Private Sub tbprelim_KeyPress(ByVal sender As Object, ByVal e As KeyPressEventArgs) Handles tbprelim.KeyPress
-
-        If Not Char.IsNumber(e.KeyChar) And Not e.KeyChar = Chr(Keys.Delete) And Not e.KeyChar = Chr(Keys.Back) And Not e.KeyChar = Chr(Keys.Space) Then
-            e.Handled = True
-            MessageBox.Show("This field will accept numbers only")
-        End If
-    End Sub
-    Private Sub tbmidterm_KeyPress(ByVal sender As Object, ByVal e As KeyPressEventArgs) Handles tbmidterm.KeyPress
-
-        If Not Char.IsNumber(e.KeyChar) And Not e.KeyChar = Chr(Keys.Delete) And Not e.KeyChar = Chr(Keys.Back) And Not e.KeyChar = Chr(Keys.Space) Then
-            e.Handled = True
-            MessageBox.Show("This field will accept numbers only")
-        End If
-    End Sub
-    Private Sub tbsemis_KeyPress(ByVal sender As Object, ByVal e As KeyPressEventArgs) Handles tbsemis.KeyPress
-
-        If Not Char.IsNumber(e.KeyChar) And Not e.KeyChar = Chr(Keys.Delete) And Not e.KeyChar = Chr(Keys.Back) And Not e.KeyChar = Chr(Keys.Space) Then
-            e.Handled = True
-            MessageBox.Show("This field will accept numbers only")
-        End If
-    End Sub
-    Private Sub tbfinal_KeyPress(ByVal sender As Object, ByVal e As KeyPressEventArgs) Handles tbfinal.KeyPress
-
-        If Not Char.IsNumber(e.KeyChar) And Not e.KeyChar = Chr(Keys.Delete) And Not e.KeyChar = Chr(Keys.Back) And Not e.KeyChar = Chr(Keys.Space) Then
-            e.Handled = True
-            MessageBox.Show("This field will accept numbers only")
-        End If
-    End Sub
-    ' end of janses
 End Class
